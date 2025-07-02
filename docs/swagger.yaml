@@ -1,0 +1,431 @@
+basePath: /
+definitions:
+  services.AccountDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+      login:
+        type: string
+    type: object
+  services.CreateAccountDto:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  services.CreateEmployeeRequest:
+    properties:
+      account_id:
+        type: integer
+      role_id:
+        type: integer
+    type: object
+  services.CreateRoleDto:
+    properties:
+      name:
+        type: string
+    type: object
+  services.EmployeeDto:
+    properties:
+      account:
+        $ref: '#/definitions/services.AccountDto'
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+      role:
+        $ref: '#/definitions/services.RoleDto'
+    type: object
+  services.RoleDto:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  services.UpdateAccountDto:
+    properties:
+      is_alive:
+        type: boolean
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  services.UpdateEmployeeDto:
+    properties:
+      accountId:
+        type: integer
+      isAlive:
+        type: boolean
+      roleId:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API для управления магазином бытовой техники.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Home Appliance Store API
+  version: "1.0"
+paths:
+  /accounts:
+    get:
+      description: Возвращает все аккаунты
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.AccountDto'
+            type: array
+      summary: Получить список аккаунтов
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый аккаунт
+      parameters:
+      - description: Данные для создания аккаунта
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateAccountDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.AccountDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать аккаунт
+      tags:
+      - accounts
+  /accounts/{id}:
+    delete:
+      description: Удаляет аккаунт по id
+      parameters:
+      - description: ID аккаунта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить аккаунт
+      tags:
+      - accounts
+    get:
+      description: Возвращает аккаунт по идентификатору
+      parameters:
+      - description: ID аккаунта
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.AccountDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить аккаунт по id
+      tags:
+      - accounts
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные аккаунта по id
+      parameters:
+      - description: ID аккаунта
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления аккаунта
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateAccountDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.AccountDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить аккаунт
+      tags:
+      - accounts
+  /employees:
+    get:
+      description: Возвращает всех сотрудников
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.EmployeeDto'
+            type: array
+      summary: Получить список сотрудников
+      tags:
+      - employees
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового сотрудника
+      parameters:
+      - description: Данные для создания сотрудника
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateEmployeeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.EmployeeDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать сотрудника
+      tags:
+      - employees
+  /employees/{id}:
+    delete:
+      description: Удаляет сотрудника по id
+      parameters:
+      - description: ID сотрудника
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить сотрудника
+      tags:
+      - employees
+    get:
+      description: Возвращает сотрудника по идентификатору
+      parameters:
+      - description: ID сотрудника
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.EmployeeDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить сотрудника по id
+      tags:
+      - employees
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные сотрудника по id
+      parameters:
+      - description: ID сотрудника
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления сотрудника
+        in: body
+        name: employee
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateEmployeeDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.EmployeeDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить сотрудника
+      tags:
+      - employees
+  /roles:
+    get:
+      description: Возвращает все роли
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.RoleDto'
+            type: array
+      summary: Получить список ролей
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новую роль
+      parameters:
+      - description: Данные для создания роли
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateRoleDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.RoleDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать роль
+      tags:
+      - roles
+  /roles/{id}:
+    get:
+      description: Возвращает роль по идентификатору
+      parameters:
+      - description: ID роли
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.RoleDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить роль по id
+      tags:
+      - roles
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные роли по id
+      parameters:
+      - description: ID роли
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления роли
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateRoleDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.RoleDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить роль
+      tags:
+      - roles
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
