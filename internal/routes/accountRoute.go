@@ -3,10 +3,34 @@ package routes
 import (
 	"HomeApplianceStore/internal/services"
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/chi/v5"
+	"github.co
 	"net/http"
 	"strconv"
 )
+
+// Новый тип хендлера, возвращающий ошибку
+type HandlerWithError func(w http.ResponseWriter, r *http.Request) error
+
+// Middleware для централизованной обработки ошибок
+func ErrorHandler(h HandlerWithError) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := h(w, r)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, services.AccountNotFoundError) {
+				http.Error(w, "not found", http.StatusNotFound)
+				return
+			}
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+// Вспомогательная функция для регистрации роутов с ErrorHandler
+func RegisterWithErrorHandler(r chi.Router, method, pattern string, handler HandlerWithError) {
+	r.MethodFunc(method, pattern, ErrorHandler(handler))
+}
 
 // @Summary      Получить список аккаунтов
 // @Description  Возвращает все аккаунты
@@ -14,17 +38,14 @@ import (
 // @Produce      json
 // @Success      200  {array}   services.AccountDto
 // @Router       /accounts [get]
-func getAccountsHandler(accountService services.AccountService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func getAccountsHandler(accountService services.AccountService) HandlerWithError {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		accounts, err := accountService.GetAccounts(r.Context())
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			return err
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(accounts)
+		return json.NewEncoder(w).Encode(accounts)
 	}
 }
 
@@ -36,23 +57,19 @@ func getAccountsHandler(accountService services.AccountService) http.HandlerFunc
 // @Success      200  {object}  services.AccountDto
 // @Failure      400  {object}  map[string]string
 // @Router       /accounts/{id} [get]
-func getAccountByIDHandler(accountService services.AccountService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func getAccountByIDHandler(accountService services.AccountService) HandlerWithError {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return nil
 		}
 		account, err := accountService.GetAccount(r.Context(), int32(id))
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			return err
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(account)
+		return json.NewEncoder(w).Encode(account)
 	}
 }
 
@@ -65,24 +82,20 @@ func getAccountByIDHandler(accountService services.AccountService) http.HandlerF
 // @Success      200      {object}  services.AccountDto
 // @Failure      400      {object}  map[string]string
 // @Router       /accounts [post]
-func createAccountHandler(accountService services.AccountService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func createAccountHandler(accountService services.AccountService) HandlerWithError {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		var requestDto services.CreateAccountDto
 		err := json.NewDecoder(r.Body).Decode(&requestDto)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return nil
 		}
 		account, err := accountService.CreateAccount(r.Context(), requestDto)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			return err
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(account)
+		return json.NewEncoder(w).Encode(account)
 	}
 }
 
@@ -96,30 +109,26 @@ func createAccountHandler(accountService services.AccountService) http.HandlerFu
 // @Success      200     {object}  services.AccountDto
 // @Failure      400     {object}  map[string]string
 // @Router       /accounts/{id} [put]
-func updateAccountHandler(accountService services.AccountService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func updateAccountHandler(accountService services.AccountService) HandlerWithError {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return nil
 		}
 		var requestDto services.UpdateAccountDto
 		err = json.NewDecoder(r.Body).Decode(&requestDto)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return nil
 		}
+		defer r.Body.Close()
 		account, err := accountService.UpdateAccount(r.Context(), int32(id), requestDto)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			return err
 		}
-		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(account)
+		return json.NewEncoder(w).Encode(account)
 	}
 }
 
@@ -131,33 +140,30 @@ func updateAccountHandler(accountService services.AccountService) http.HandlerFu
 // @Success      204  {object}  nil
 // @Failure      400  {object}  map[string]string
 // @Router       /accounts/{id} [delete]
-func deleteAccountHandler(accountService services.AccountService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func deleteAccountHandler(accountService services.AccountService) HandlerWithError {
+	return func(w http.ResponseWriter, r *http.Request) error {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return nil
 		}
 		err = accountService.DeleteAccount(r.Context(), int32(id))
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
+			return err
 		}
 		w.WriteHeader(http.StatusNoContent)
-		w.Header().Set("Content-Type", "application/json")
+		return nil
 	}
 }
 
 func NewAccountRouter(accountService services.AccountService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/", getAccountsHandler(accountService))
-	r.Get("/{id}", getAccountByIDHandler(accountService))
-	r.Post("/", createAccountHandler(accountService))
-	r.Put("/{id}", updateAccountHandler(accountService))
-	r.Delete("/{id}", deleteAccountHandler(accountService))
+	RegisterWithErrorHandler(r, "GET", "/", getAccountsHandler(accountService))
+	RegisterWithErrorHandler(r, "GET", "/{id}", getAccountByIDHandler(accountService))
+	RegisterWithErrorHandler(r, "POST", "/", createAccountHandler(accountService))
+	RegisterWithErrorHandler(r, "PUT", "/{id}", updateAccountHandler(accountService))
+	RegisterWithErrorHandler(r, "DELETE", "/{id}", deleteAccountHandler(accountService))
 
 	return r
 }

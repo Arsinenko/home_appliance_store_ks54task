@@ -54,7 +54,12 @@ func (q *Queries) DeleteCustomer(ctx context.Context, id int32) error {
 }
 
 const getCustomer = `-- name: GetCustomer :one
-SELECT c.id, c.account_id, c.balance, c.created_at, c.is_alive, a.login
+SELECT
+    c.id, c.account_id, c.balance, c.created_at, c.is_alive,
+    a.login as account_login,
+    a.created_at as account_created_at,
+    a.is_alive as account_is_alive
+
 FROM Customers c
          JOIN Accounts a ON c.account_id = a.id
 WHERE c.id = $1
@@ -62,12 +67,14 @@ LIMIT 1
 `
 
 type GetCustomerRow struct {
-	ID        int32
-	AccountID int32
-	Balance   pgtype.Numeric
-	CreatedAt pgtype.Timestamp
-	IsAlive   bool
-	Login     string
+	ID               int32
+	AccountID        int32
+	Balance          pgtype.Numeric
+	CreatedAt        pgtype.Timestamp
+	IsAlive          bool
+	AccountLogin     string
+	AccountCreatedAt pgtype.Timestamp
+	AccountIsAlive   bool
 }
 
 // Получаем покупателя вместе с его логином
@@ -80,13 +87,18 @@ func (q *Queries) GetCustomer(ctx context.Context, id int32) (GetCustomerRow, er
 		&i.Balance,
 		&i.CreatedAt,
 		&i.IsAlive,
-		&i.Login,
+		&i.AccountLogin,
+		&i.AccountCreatedAt,
+		&i.AccountIsAlive,
 	)
 	return i, err
 }
 
 const listCustomers = `-- name: ListCustomers :many
-SELECT c.id, c.account_id, c.balance, c.created_at, c.is_alive, a.login
+SELECT c.id, c.account_id, c.balance, c.created_at, c.is_alive,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Customers c
          JOIN Accounts a ON c.account_id = a.id
 WHERE c.is_alive = true
@@ -94,12 +106,14 @@ ORDER BY c.id
 `
 
 type ListCustomersRow struct {
-	ID        int32
-	AccountID int32
-	Balance   pgtype.Numeric
-	CreatedAt pgtype.Timestamp
-	IsAlive   bool
-	Login     string
+	ID               int32
+	AccountID        int32
+	Balance          pgtype.Numeric
+	CreatedAt        pgtype.Timestamp
+	IsAlive          bool
+	AccountLogin     string
+	AccountCreatedAt pgtype.Timestamp
+	AccountIsAlive   bool
 }
 
 // Получаем список покупателей вместе с их логинами
@@ -118,7 +132,9 @@ func (q *Queries) ListCustomers(ctx context.Context) ([]ListCustomersRow, error)
 			&i.Balance,
 			&i.CreatedAt,
 			&i.IsAlive,
-			&i.Login,
+			&i.AccountLogin,
+			&i.AccountCreatedAt,
+			&i.AccountIsAlive,
 		); err != nil {
 			return nil, err
 		}

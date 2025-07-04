@@ -18,6 +18,13 @@ definitions:
       password:
         type: string
     type: object
+  services.CreateCustomerDto:
+    properties:
+      accountId:
+        type: integer
+      balance:
+        type: integer
+    type: object
   services.CreateEmployeeRequest:
     properties:
       account_id:
@@ -29,6 +36,19 @@ definitions:
     properties:
       name:
         type: string
+    type: object
+  services.CustomerDto:
+    properties:
+      account:
+        $ref: '#/definitions/services.AccountDto'
+      balance:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
     type: object
   services.EmployeeDto:
     properties:
@@ -205,6 +225,34 @@ paths:
       summary: Обновить аккаунт
       tags:
       - accounts
+  /customers:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового клиента
+      parameters:
+      - description: Данные для создания клиента
+        in: body
+        name: Customer
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateCustomerDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.CustomerDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать клиента
+      tags:
+      - customers
   /employees:
     get:
       description: Возвращает всех сотрудников

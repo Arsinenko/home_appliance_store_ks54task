@@ -207,6 +207,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/customers": {
+            "post": {
+                "description": "Создаёт нового клиента",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "customers"
+                ],
+                "summary": "Создать клиента",
+                "parameters": [
+                    {
+                        "description": "Данные для создания клиента",
+                        "name": "Customer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateCustomerDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/services.CustomerDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/employees": {
             "get": {
                 "description": "Возвращает всех сотрудников",
@@ -570,6 +613,17 @@ const docTemplate = `{
                 }
             }
         },
+        "services.CreateCustomerDto": {
+            "type": "object",
+            "properties": {
+                "accountId": {
+                    "type": "integer"
+                },
+                "balance": {
+                    "type": "integer"
+                }
+            }
+        },
         "services.CreateEmployeeRequest": {
             "type": "object",
             "properties": {
@@ -586,6 +640,26 @@ const docTemplate = `{
             "properties": {
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "services.CustomerDto": {
+            "type": "object",
+            "properties": {
+                "account": {
+                    "$ref": "#/definitions/services.AccountDto"
+                },
+                "balance": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_alive": {
+                    "type": "boolean"
                 }
             }
         },

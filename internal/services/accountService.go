@@ -3,6 +3,8 @@ package services
 import (
 	"HomeApplianceStore/pkg/gen"
 	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"time"
 )
@@ -45,7 +47,7 @@ func (a AccountService) CreateAccount(ctx context.Context, request CreateAccount
 	account, err := a.Queries.CreateAccount(ctx, gen.CreateAccountParams{
 		Login:     request.Login,
 		Password:  request.Password,
-		CreatedAt: pgtype.Timestamp{Time: time.Now()},
+		CreatedAt: pgtype.Timestamp{Time: time.Now(), Valid: true},
 		IsAlive:   true,
 	})
 	if err != nil {
@@ -56,10 +58,15 @@ func (a AccountService) CreateAccount(ctx context.Context, request CreateAccount
 
 }
 
+var AccountNotFoundError = errors.New("account not found")
+
 func (a AccountService) GetAccount(ctx context.Context, id int32) (AccountDto, error) {
 
 	account, err := a.Queries.GetAccount(ctx, id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return AccountDto{}, AccountNotFoundError
+		}
 		return AccountDto{}, err
 	}
 	response := ToAccountDto(account)
@@ -93,6 +100,9 @@ func (a AccountService) UpdateAccount(ctx context.Context, id int32, request Upd
 		IsAlive:  request.IsAlive,
 	})
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return AccountDto{}, AccountNotFoundError
+		}
 		return AccountDto{}, err
 	}
 	response := ToAccountDto(account)

@@ -53,7 +53,10 @@ func (q *Queries) DeleteSupplier(ctx context.Context, id int32) error {
 }
 
 const getSupplier = `-- name: GetSupplier :one
-SELECT s.id, s.account_id, s.created_at, s.is_alive, a.login
+SELECT s.id, s.account_id, s.created_at, s.is_alive,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Accounts a ON s.account_id = a.id
 WHERE s.id = $1
@@ -61,11 +64,13 @@ WHERE s.id = $1
 `
 
 type GetSupplierRow struct {
-	ID        int32
-	AccountID int32
-	CreatedAt pgtype.Timestamp
-	IsAlive   bool
-	Login     string
+	ID               int32
+	AccountID        int32
+	CreatedAt        pgtype.Timestamp
+	IsAlive          bool
+	AccountLogin     string
+	AccountCreatedAt pgtype.Timestamp
+	AccountIsAlive   bool
 }
 
 // Получаем поставщика вместе с его логином
@@ -77,13 +82,18 @@ func (q *Queries) GetSupplier(ctx context.Context, id int32) (GetSupplierRow, er
 		&i.AccountID,
 		&i.CreatedAt,
 		&i.IsAlive,
-		&i.Login,
+		&i.AccountLogin,
+		&i.AccountCreatedAt,
+		&i.AccountIsAlive,
 	)
 	return i, err
 }
 
 const listSuppliers = `-- name: ListSuppliers :many
-SELECT s.id, s.account_id, s.created_at, s.is_alive, a.login
+SELECT s.id, s.account_id, s.created_at, s.is_alive,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Accounts a ON s.account_id = a.id
 WHERE s.is_alive = true
@@ -91,11 +101,13 @@ ORDER BY s.id
 `
 
 type ListSuppliersRow struct {
-	ID        int32
-	AccountID int32
-	CreatedAt pgtype.Timestamp
-	IsAlive   bool
-	Login     string
+	ID               int32
+	AccountID        int32
+	CreatedAt        pgtype.Timestamp
+	IsAlive          bool
+	AccountLogin     string
+	AccountCreatedAt pgtype.Timestamp
+	AccountIsAlive   bool
 }
 
 // Получаем список поставщиков вместе с их логинами
@@ -113,7 +125,9 @@ func (q *Queries) ListSuppliers(ctx context.Context) ([]ListSuppliersRow, error)
 			&i.AccountID,
 			&i.CreatedAt,
 			&i.IsAlive,
-			&i.Login,
+			&i.AccountLogin,
+			&i.AccountCreatedAt,
+			&i.AccountIsAlive,
 		); err != nil {
 			return nil, err
 		}

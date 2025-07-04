@@ -5,7 +5,10 @@ VALUES ($1, $2, $3, $4)
 
 -- name: GetSupplier :one
 -- Получаем поставщика вместе с его логином
-SELECT s.*, a.login
+SELECT s.*,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Accounts a ON s.account_id = a.id
 WHERE s.id = $1
@@ -13,7 +16,10 @@ WHERE s.id = $1
 
 -- name: ListSuppliers :many
 -- Получаем список поставщиков вместе с их логинами
-SELECT s.*, a.login
+SELECT s.*,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Accounts a ON s.account_id = a.id
 WHERE s.is_alive = true

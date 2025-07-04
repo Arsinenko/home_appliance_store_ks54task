@@ -37,6 +37,7 @@ func main() {
 	accountService := services.AccountService{Queries: *queries}
 	employeeService := services.EmployeeService{Queries: *queries}
 	roleService := &services.RoleService{Queries: queries}
+	customerService := services.CustomerService{Queries: *queries}
 
 	r := chi.NewRouter()
 
@@ -64,6 +65,7 @@ func main() {
 	r.Mount("/accounts", routes.NewAccountRouter(accountService))
 	r.Mount("/employees", routes.NewEmployeeRouter(employeeService))
 	r.Mount("/roles", routes.NewRoleRouter(roleService))
+	r.Mount("/customers", routes.NewCustomerRouter(customerService))
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", r)
