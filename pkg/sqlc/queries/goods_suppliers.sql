@@ -25,7 +25,10 @@ WHERE gs.supplier_id = $1
 
 -- name: ListSuppliersByGood :many
 -- Получаем всех поставщиков для конкретного товара, включая их логины
-SELECT s.*, a.login
+SELECT s.*,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Goods_Suppliers gs ON s.id = gs.supplier_id
          JOIN Accounts a ON s.account_id = a.id

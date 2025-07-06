@@ -147,7 +147,10 @@ func (q *Queries) ListGoodsBySupplier(ctx context.Context, supplierID int32) ([]
 }
 
 const listSuppliersByGood = `-- name: ListSuppliersByGood :many
-SELECT s.id, s.account_id, s.created_at, s.is_alive, a.login
+SELECT s.id, s.account_id, s.created_at, s.is_alive,
+       a.login as account_login,
+       a.created_at as account_created_at,
+       a.is_alive as account_is_alive
 FROM Suppliers s
          JOIN Goods_Suppliers gs ON s.id = gs.supplier_id
          JOIN Accounts a ON s.account_id = a.id
@@ -157,11 +160,13 @@ WHERE gs.good_id = $1
 `
 
 type ListSuppliersByGoodRow struct {
-	ID        int32
-	AccountID int32
-	CreatedAt pgtype.Timestamp
-	IsAlive   bool
-	Login     string
+	ID               int32
+	AccountID        int32
+	CreatedAt        pgtype.Timestamp
+	IsAlive          bool
+	AccountLogin     string
+	AccountCreatedAt pgtype.Timestamp
+	AccountIsAlive   bool
 }
 
 // Получаем всех поставщиков для конкретного товара, включая их логины
@@ -179,7 +184,9 @@ func (q *Queries) ListSuppliersByGood(ctx context.Context, goodID int32) ([]List
 			&i.AccountID,
 			&i.CreatedAt,
 			&i.IsAlive,
-			&i.Login,
+			&i.AccountLogin,
+			&i.AccountCreatedAt,
+			&i.AccountIsAlive,
 		); err != nil {
 			return nil, err
 		}

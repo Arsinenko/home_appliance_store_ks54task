@@ -9,6 +9,15 @@ import (
 	"strconv"
 )
 
+// @Summary      Создать магазин
+// @Description  Создаёт новый магазин
+// @Tags         stores
+// @Accept       json
+// @Produce      json
+// @Param        store  body      services.CreateStoreDto  true  "Данные для создания магазина"
+// @Success      201    {object}  services.StoreDto
+// @Failure      400    {object}  string
+// @Router       /stores [post]
 func createStoreHandler(service services.StoreService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var storeDto services.CreateStoreDto
@@ -35,6 +44,15 @@ func createStoreHandler(service services.StoreService) http.HandlerFunc {
 		json.NewEncoder(w).Encode(response)
 	})
 }
+
+// @Summary      Получить магазин по id
+// @Description  Возвращает магазин по идентификатору
+// @Tags         stores
+// @Produce      json
+// @Param        id   path      int  true  "ID магазина"
+// @Success      200  {object}  services.StoreDto
+// @Failure      400  {object}  string
+// @Router       /stores/{id} [get]
 func GetStoreHandler(service services.StoreService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -60,6 +78,13 @@ func GetStoreHandler(service services.StoreService) http.HandlerFunc {
 	})
 }
 
+// @Summary      Получить список магазинов
+// @Description  Возвращает все магазины
+// @Tags         stores
+// @Produce      json
+// @Success      200  {array}   services.StoreDto
+// @Failure      400  {object}  string
+// @Router       /stores [get]
 func GetStoresHandler(service services.StoreService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response, err := service.GetStores(r.Context())
@@ -79,6 +104,16 @@ func GetStoresHandler(service services.StoreService) http.HandlerFunc {
 	})
 }
 
+// @Summary      Обновить магазин
+// @Description  Обновляет данные магазина по id
+// @Tags         stores
+// @Accept       json
+// @Produce      json
+// @Param        id      path      int                    true  "ID магазина"
+// @Param        store   body      services.UpdateStoreDto true  "Данные для обновления магазина"
+// @Success      200     {object}  services.StoreDto
+// @Failure      400     {object}  string
+// @Router       /stores/{id} [put]
 func UpdateStoreHandler(service services.StoreService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var request services.UpdateStoreDto
@@ -106,6 +141,14 @@ func UpdateStoreHandler(service services.StoreService) http.HandlerFunc {
 	})
 }
 
+// @Summary      Удалить магазин
+// @Description  Удаляет магазин по id
+// @Tags         stores
+// @Produce      json
+// @Param        id   path      int  true  "ID магазина"
+// @Success      204
+// @Failure      400  {object}  string
+// @Router       /stores/{id} [delete]
 func DeleteStoreHandler(service services.StoreService) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

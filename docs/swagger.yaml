@@ -32,10 +32,38 @@ definitions:
       role_id:
         type: integer
     type: object
+  services.CreateGoodDto:
+    properties:
+      article:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  services.CreateGoodsSupplierDto:
+    properties:
+      product_id:
+        type: integer
+      supplier_id:
+        type: integer
+    type: object
   services.CreateRoleDto:
     properties:
       name:
         type: string
+    type: object
+  services.CreateStoreDto:
+    properties:
+      address:
+        type: string
+    type: object
+  services.CreateSupplierDto:
+    properties:
+      account_id:
+        type: integer
     type: object
   services.CustomerDto:
     properties:
@@ -63,6 +91,21 @@ definitions:
       role:
         $ref: '#/definitions/services.RoleDto'
     type: object
+  services.GoodDto:
+    properties:
+      article:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      quantity:
+        type: integer
+    type: object
   services.RoleDto:
     properties:
       created_at:
@@ -71,6 +114,30 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  services.StoreDto:
+    properties:
+      address:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  services.SupplierDto:
+    properties:
+      account:
+        $ref: '#/definitions/services.AccountDto'
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
     type: object
   services.UpdateAccountDto:
     properties:
@@ -81,6 +148,8 @@ definitions:
       password:
         type: string
     type: object
+  services.UpdateCustomerDto:
+    type: object
   services.UpdateEmployeeDto:
     properties:
       accountId:
@@ -89,6 +158,37 @@ definitions:
         type: boolean
       roleId:
         type: integer
+    type: object
+  services.UpdateGoodDto:
+    properties:
+      article:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  services.UpdateStoreDto:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      is_alive:
+        type: boolean
+    type: object
+  services.UpdateSupplierDto:
+    properties:
+      id:
+        type: integer
+      is_alive:
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -226,6 +326,26 @@ paths:
       tags:
       - accounts
   /customers:
+    get:
+      description: Возвращает всех клиентов
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.CustomerDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список клиентов
+      tags:
+      - customers
     post:
       consumes:
       - application/json
@@ -233,10 +353,57 @@ paths:
       parameters:
       - description: Данные для создания клиента
         in: body
-        name: Customer
+        name: customer
         required: true
         schema:
           $ref: '#/definitions/services.CreateCustomerDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.CustomerDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать клиента
+      tags:
+      - customers
+  /customers/{id}:
+    delete:
+      description: Удаляет клиента по id
+      parameters:
+      - description: ID клиента
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить клиента
+      tags:
+      - customers
+    get:
+      description: Возвращает клиента по идентификатору
+      parameters:
+      - description: ID клиента
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -250,7 +417,39 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Создать клиента
+      summary: Получить клиента по id
+      tags:
+      - customers
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные клиента по id
+      parameters:
+      - description: ID клиента
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления клиента
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateCustomerDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.CustomerDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить клиента
       tags:
       - customers
   /employees:
@@ -282,8 +481,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/services.EmployeeDto'
         "400":
@@ -374,6 +573,227 @@ paths:
       summary: Обновить сотрудника
       tags:
       - employees
+  /goods:
+    get:
+      description: Возвращает все товары
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.GoodDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить список товаров
+      tags:
+      - goods
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый товар
+      parameters:
+      - description: Данные товара
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateGoodDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.GoodDto'
+      summary: Создать новый товар
+      tags:
+      - goods
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные товара
+      parameters:
+      - description: Данные для обновления товара
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateGoodDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.GoodDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Обновить товар
+      tags:
+      - goods
+  /goods-supplier:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новую связь между товаром и поставщиком
+      parameters:
+      - description: Данные для создания связи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateGoodsSupplierDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.CreateGoodsSupplierDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Создать связь между товаром и поставщиком
+      tags:
+      - goods-supplier
+  /goods-supplier/{id}:
+    delete:
+      description: Удаляет связь между товаром и поставщиком по идентификатору
+      parameters:
+      - description: ID связи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Удалить связь между товаром и поставщиком
+      tags:
+      - goods-supplier
+  /goods-supplier/by_good_id/{id}:
+    get:
+      description: Возвращает поставщиков, связанных с товаром
+      parameters:
+      - description: ID товара
+        in: path
+        name: good_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.SupplierDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить поставщиков по товару
+      tags:
+      - goods-supplier
+  /goods-supplier/by_supplier_id/{id}:
+    get:
+      description: Возвращает товары, связанные с поставщиком
+      parameters:
+      - description: ID поставщика
+        in: path
+        name: supplier_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.GoodDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Получить товары по поставщику
+      tags:
+      - goods-supplier
+  /goods/{id}:
+    delete:
+      description: Удаляет товар по идентификатору
+      parameters:
+      - description: ID товара
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Удалить товар
+      tags:
+      - goods
+    get:
+      description: Возвращает товар по идентификатору
+      parameters:
+      - description: ID товара
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.GoodDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить товар по id
+      tags:
+      - goods
   /roles:
     get:
       description: Возвращает все роли
@@ -473,6 +893,240 @@ paths:
       summary: Обновить роль
       tags:
       - roles
+  /stores:
+    get:
+      description: Возвращает все магазины
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.StoreDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить список магазинов
+      tags:
+      - stores
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый магазин
+      parameters:
+      - description: Данные для создания магазина
+        in: body
+        name: store
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateStoreDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.StoreDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Создать магазин
+      tags:
+      - stores
+  /stores/{id}:
+    delete:
+      description: Удаляет магазин по id
+      parameters:
+      - description: ID магазина
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Удалить магазин
+      tags:
+      - stores
+    get:
+      description: Возвращает магазин по идентификатору
+      parameters:
+      - description: ID магазина
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.StoreDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить магазин по id
+      tags:
+      - stores
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные магазина по id
+      parameters:
+      - description: ID магазина
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления магазина
+        in: body
+        name: store
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateStoreDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.StoreDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Обновить магазин
+      tags:
+      - stores
+  /suppliers:
+    get:
+      description: Возвращает всех поставщиков
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.SupplierDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить список поставщиков
+      tags:
+      - suppliers
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового поставщика
+      parameters:
+      - description: Данные для создания поставщика
+        in: body
+        name: supplier
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateSupplierDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/services.SupplierDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Создать поставщика
+      tags:
+      - suppliers
+  /suppliers/{id}:
+    delete:
+      description: Удаляет поставщика по id
+      parameters:
+      - description: ID поставщика
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Удалить поставщика
+      tags:
+      - suppliers
+    get:
+      description: Возвращает поставщика по идентификатору
+      parameters:
+      - description: ID поставщика
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.SupplierDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Получить поставщика по id
+      tags:
+      - suppliers
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные поставщика по id
+      parameters:
+      - description: ID поставщика
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления поставщика
+        in: body
+        name: supplier
+        required: true
+        schema:
+          $ref: '#/definitions/services.UpdateSupplierDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.SupplierDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Обновить поставщика
+      tags:
+      - suppliers
 securityDefinitions:
   BasicAuth:
     type: basic

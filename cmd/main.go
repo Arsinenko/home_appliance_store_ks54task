@@ -6,11 +6,12 @@ import (
 	"HomeApplianceStore/pkg"
 	"HomeApplianceStore/pkg/gen"
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"log"
-	"net/http"
 )
 
 // @title           Home Appliance Store API
@@ -38,6 +39,10 @@ func main() {
 	employeeService := services.EmployeeService{Queries: *queries}
 	roleService := &services.RoleService{Queries: queries}
 	customerService := services.CustomerService{Queries: *queries}
+	goodsService := services.GoodsService{Queries: *queries}
+	storeService := services.StoreService{Queries: *queries}
+	supplierService := services.SupplierService{Queries: *queries}
+	goodsSupplierService := services.GoodsSupplierService{Queries: *queries}
 
 	r := chi.NewRouter()
 
@@ -66,6 +71,10 @@ func main() {
 	r.Mount("/employees", routes.NewEmployeeRouter(employeeService))
 	r.Mount("/roles", routes.NewRoleRouter(roleService))
 	r.Mount("/customers", routes.NewCustomerRouter(customerService))
+	r.Mount("/goods", routes.NewGoodsRouter(goodsService))
+	r.Mount("/stores", routes.NewStoreRouter(storeService))
+	r.Mount("/suppliers", routes.NewSupplierRouter(supplierService))
+	r.Mount("/goods-suppliers", routes.NewGoodsSupplierRouter(goodsSupplierService))
 
 	log.Println("Server started at :8080")
 	http.ListenAndServe(":8080", r)

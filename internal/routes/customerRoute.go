@@ -13,8 +13,8 @@ import (
 // @Tags         customers
 // @Accept       json
 // @Produce      json
-// @Param        Customer  body      services.CreateCustomerDto  true  "Данные для создания клиента"
-// @Success      200      {object}  services.CustomerDto
+// @Param        customer  body      services.CreateCustomerDto  true  "Данные для создания клиента"
+// @Success      201      {object}  services.CustomerDto
 // @Failure      400      {object}  map[string]string
 // @Router       /customers [post]
 func createCustomerHandler(service services.CustomerService) http.HandlerFunc {
@@ -38,6 +38,15 @@ func createCustomerHandler(service services.CustomerService) http.HandlerFunc {
 		json.NewEncoder(w).Encode(customer)
 	}
 }
+
+// @Summary      Получить клиента по id
+// @Description  Возвращает клиента по идентификатору
+// @Tags         customers
+// @Produce      json
+// @Param        id   path      int  true  "ID клиента"
+// @Success      200  {object}  services.CustomerDto
+// @Failure      400  {object}  map[string]string
+// @Router       /customers/{id} [get]
 func getCustomerHandler(service services.CustomerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))
@@ -58,6 +67,14 @@ func getCustomerHandler(service services.CustomerService) http.HandlerFunc {
 
 	}
 }
+
+// @Summary      Получить список клиентов
+// @Description  Возвращает всех клиентов
+// @Tags         customers
+// @Produce      json
+// @Success      200  {array}   services.CustomerDto
+// @Failure      400  {object}  map[string]string
+// @Router       /customers [get]
 func getCustomersHandler(service services.CustomerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		customers, err := service.GetCustomers(r.Context())
@@ -71,6 +88,17 @@ func getCustomersHandler(service services.CustomerService) http.HandlerFunc {
 		json.NewEncoder(w).Encode(customers)
 	}
 }
+
+// @Summary      Обновить клиента
+// @Description  Обновляет данные клиента по id
+// @Tags         customers
+// @Accept       json
+// @Produce      json
+// @Param        id      path      int                        true  "ID клиента"
+// @Param        customer body      services.UpdateCustomerDto  true  "Данные для обновления клиента"
+// @Success      200     {object}  services.CustomerDto
+// @Failure      400     {object}  map[string]string
+// @Router       /customers/{id} [put]
 func updateCustomerHandler(service services.CustomerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var updateCustomerDto services.UpdateCustomerDto
@@ -92,6 +120,15 @@ func updateCustomerHandler(service services.CustomerService) http.HandlerFunc {
 		json.NewEncoder(w).Encode(customer)
 	}
 }
+
+// @Summary      Удалить клиента
+// @Description  Удаляет клиента по id
+// @Tags         customers
+// @Produce      json
+// @Param        id   path      int  true  "ID клиента"
+// @Success      204
+// @Failure      400  {object}  map[string]string
+// @Router       /customers/{id} [delete]
 func deleteCustomerHandler(service services.CustomerService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.Atoi(chi.URLParam(r, "id"))

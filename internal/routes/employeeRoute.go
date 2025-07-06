@@ -62,7 +62,7 @@ func getEmployeeByIDHandler(service services.EmployeeService) http.HandlerFunc {
 // @Accept       json
 // @Produce      json
 // @Param        employee  body      services.CreateEmployeeRequest  true  "Данные для создания сотрудника"
-// @Success      200       {object}  services.EmployeeDto
+// @Success      201       {object}  services.EmployeeDto
 // @Failure      400       {object}  map[string]string
 // @Router       /employees [post]
 func createEmployeeHandler(service services.EmployeeService) http.HandlerFunc {
@@ -91,8 +91,8 @@ func createEmployeeHandler(service services.EmployeeService) http.HandlerFunc {
 // @Tags         employees
 // @Accept       json
 // @Produce      json
-// @Param        id       path      int                              true  "ID сотрудника"
-// @Param        employee body      services.UpdateEmployeeDto       true  "Данные для обновления сотрудника"
+// @Param        id       path      int                        true  "ID сотрудника"
+// @Param        employee body      services.UpdateEmployeeDto true  "Данные для обновления сотрудника"
 // @Success      200      {object}  services.EmployeeDto
 // @Failure      400      {object}  map[string]string
 // @Router       /employees/{id} [put]
@@ -128,7 +128,7 @@ func updateEmployeeHandler(service services.EmployeeService) http.HandlerFunc {
 // @Tags         employees
 // @Produce      json
 // @Param        id   path      int  true  "ID сотрудника"
-// @Success      204  {object}  nil
+// @Success      204
 // @Failure      400  {object}  map[string]string
 // @Router       /employees/{id} [delete]
 func deleteEmployeeHandler(service services.EmployeeService) http.HandlerFunc {
